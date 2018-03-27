@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"isro/isro"
 )
@@ -20,24 +19,27 @@ func main() {
 	fmt.Println("Running launch sequence")
 	LS1 := isro.LaunchPad{Name: "LS1"}
 	LS2 := isro.LaunchPad{Name: "LS2"}
-	for i := 0; i < 500; i += 4 {
-		var success bool
-		if i%8 != 0 {
-			success = LS2.LaunchSATs(
-				isro.NewSatellite(fmt.Sprintf("SAT%d", (i+1))),
-				isro.NewSatellite(fmt.Sprintf("SAT%d", (i+2))),
-				isro.NewSatellite(fmt.Sprintf("SAT%d", (i+3))), isro.NewSatellite(fmt.Sprintf("SAT%d", (i+4))))
-			if !success {
-				panic(errors.New("LS2 failed"))
-			}
-		} else {
-			success = LS1.LaunchSATs(
-				isro.NewSatellite(fmt.Sprintf("SAT%d", (i+1))),
-				isro.NewSatellite(fmt.Sprintf("SAT%d", (i+2))),
-				isro.NewSatellite(fmt.Sprintf("SAT%d", (i+3))), isro.NewSatellite(fmt.Sprintf("SAT%d", (i+4))))
-			if !success {
-				panic(errors.New("LS1 failed"))
-			}
+	var c = make(chan string)
+	for i := 1; i <= 500; i++ {
+		switch i % 8 {
+		case 1, 2, 3, 4:
+			LS1.AddSAT(isro.NewSatellite(fmt.Sprintf("SAT%d", i)))
+		default:
+			LS2.AddSAT(isro.NewSatellite(fmt.Sprintf("SAT%d", i)))
+		}
+		if i%8 == 0 {
+			go LS1.LaunchSATs(c)
+			success := <-c
+			fmt.Println(success)
+			go LS2.LaunchSATs(c)
+			success = <-c
+			fmt.Println(success)
+
+		}
+		if i == 500 {
+			go LS1.LaunchSATs(c)
+			success := <-c
+			fmt.Println(success)
 		}
 	}
 	fmt.Println("Launch sequence complete")
