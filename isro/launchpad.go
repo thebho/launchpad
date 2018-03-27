@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// LaunchPad is a class for launching satellites
 type LaunchPad struct {
 	Name       string
 	satellites []Satellite
@@ -13,10 +14,12 @@ type LaunchPad struct {
 
 var wg sync.WaitGroup
 
+// AddSAT appends a satellite to the LaunchPad
 func (l *LaunchPad) AddSAT(sat Satellite) {
 	l.satellites = append(l.satellites, sat)
 }
 
+// LaunchSATs launches all current satellites and clears the pad
 func (l *LaunchPad) LaunchSATs(c chan string) {
 	fmt.Printf("Launching from LaunchPad %s\n", l.Name)
 	wg.Add(len(l.satellites))
