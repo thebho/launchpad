@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"isro/isro"
+	"launchpad/isro"
 )
 
 /*
